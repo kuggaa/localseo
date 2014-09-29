@@ -1,5 +1,0 @@
-Options +FollowSymlinks
-addhandler x-mapp-php5 .php
-RewriteEngine On
-RewriteBase /
-

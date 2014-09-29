@@ -1,0 +1,5 @@
+AuthType Basic
+AuthName "My Protected Area"
+AuthUserFile /var/www/localseo/analyze2/dev/.htpasswd
+Require valid-user
+Options +Indexes 

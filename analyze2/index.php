@@ -1,9 +1,329 @@
+<?php 
+    session_start();
+    $_SESSION['type'] = 'private';
+    $url =  $_SESSION['url'];
+    $finish =  $_SESSION['finish'];
+    /*if (!$url) {
+      header("Location: index.php");
+      die();
+    }*/
+    /*
+    *   Domain Age
+    */
+    $getDomainAge = json_decode($_SESSION['getDomainAge'],true);
+    //file_put_contents("/tmp/my.log",$_SESSION['getDomainAge'].'\r\n',FILE_APPEND);
+    //file_put_contents("/tmp/my.log",$getDomainAge['created'],FILE_APPEND);
+    /*
+    *   End Domain Age
+    */
+    /*
+    *   Alexa Rank
+    */
+    $getAlexaGlobalRank =  $_SESSION['getAlexaGlobalRank'];
+    /*
+    *   END Alexa Rank
+    */
+
+
+    /*
+    *   Page Size
+    */
+    $pagesize =  $_SESSION['pagesize'];
+    /*
+    *   Page Size
+    */
+
+    /*
+    *   SEMRush
+    */
+    $getSEMRushDomainRank =  $_SESSION['getSEMRushDomainRank'];
+    $getSEMRushOrganicKeywords =  $_SESSION['getSEMRushOrganicKeywords'];
+    /*
+    *   END SEMRush
+    */
+    /*
+    *   WOT Reputation - get all json data  from wot api server
+    */
+    $getWOT = $_SESSION['getWOT'];
+    $getWOT =  reset($getWOT);
+    
+    function objectToArray($d) {
+        if (is_object($d)) {
+                $d = get_object_vars($d);
+        }
+        if (is_array($d)) {
+                return array_map(__FUNCTION__, $d);
+        } else {
+            // Return array
+                return $d;
+        }
+    }
+    
+    function test_reputation($rep){
+        if($rep >= 80)return 'Excellent';
+        if($rep >= 60 && $rep < 80)return 'Good';
+        if($rep >= 40 && $rep < 60)return 'Unsatisfactory';
+        if($rep >= 20 && $rep < 40)return 'Poor';
+        if($rep > 0 && $rep < 20)return 'Very poor';
+        return "not available";
+    }
+    
+     function test_categories($cat){
+        if($cat == '101')return 'Malware or viruses';
+        if($cat == '102')return 'Poor customer experience';
+        if($cat == '103')return 'Phishing';
+        if($cat == '104')return 'Scam';
+        if($cat == '105')return 'Potentially illegal';
+        if($cat == '201')return 'Misleading claims or unethical';
+        if($cat == '202')return 'Privacy risks';
+        if($cat == '203')return 'Suspicious';
+        if($cat == '204')return 'Hate, discrimination';
+        if($cat == '205')return 'Spam';
+        if($cat == '206')return 'Potentially unwanted programs';
+        if($cat == '207')return 'Ads / pop-ups';
+        if($cat == '301')return 'Online tracking';
+        if($cat == '302')return 'Alternative or controversial medicine';
+        if($cat == '303')return 'Opinions, religion, politics';
+        if($cat == '304')return 'Other';
+        if($cat == '501')return 'Good site';
+        if($cat == '401')return 'Adult content';
+        if($cat == '402')return 'Incidental nudity';
+        if($cat == '403')return 'Gruesome or shocking';
+        if($cat == '404')return 'Site for kids';
+        return 'Not available';
+    }
+    $_0 = '0';
+    $_4 = '4';
+
+    $trustworthiness = $getWOT->$_0;
+    $trustworthiness = $trustworthiness[0];
+    $childsafety = $getWOT->$_4;
+    $childsafety = $childsafety[0];
+    $categories = $getWOT->categories;
+    /*
+    *   END WOT Reputation
+    */
+
+    $countImagesAltTexts = $_SESSION['countImagesAltTexts'];
+    $checkTitle = $_SESSION['checkTitle'];
+    $checkMetaDescription = $_SESSION['checkMetaDescription'];
+    $checkMetaKeywords = $_SESSION['checkMetaKeywords'];
+    $countWords = $_SESSION['countWords'];
+    $getMostMeetWords = $_SESSION['getMostMeetWords'];
+    $checkCleanUrls = $_SESSION['checkCleanUrls'];
+    $getGoogleToolbarPageRank = $_SESSION['getGoogleToolbarPageRank'];
+    $getGoogleBacklinksTotal = $_SESSION['getGoogleBacklinksTotal'];
+    //var_dump($getGoogleBacklinksTotal);die();
+    $getGooglePlusOnes = $_SESSION['getGooglePlusOnes'];
+    $getPagespeedScore = $_SESSION['getPagespeedScore'];
+    $getSiteindexTotal = $_SESSION['getSiteindexTotal'];
+    //var_dump($getPagespeedScore);die();
+    $getSiteindexTotalBing = $_SESSION['getSiteindexTotalBing'];
+    $getFacebookInteractions = $_SESSION['getFacebookInteractions'];
+    $getTwitterMentions = $_SESSION['getTwitterMentions'];
+    $hasRobots = $_SESSION['hasRobots'];
+    $hasSitemaps = $_SESSION['hasSitemaps'];
+    //var_dump($getSitemaps);die();
+    $validate =  $_SESSION['validate'];
+    $getWWWResolve = $_SESSION['getWWWResolve'];
+    $getIpCanonicalization = $_SESSION['getIpCanonicalization'];
+    $hasFavicon = $_SESSION['hasFavicon'];
+    $countH1 = $_SESSION['countH1'];
+    $checkLang = $_SESSION['checkLang'];
+    $checkMetaCharset = $_SESSION['checkMetaCharset'];
+    $img = $_SESSION['img'];
+
+    $errorScore = (count($validate['errors'])/15 > 1) ? 100 : count($validate['errors'])/15*100;
+    $warnScore = (count($validate['warnings'])/30 > 1) ? 100 : count($validate['warnings'])/30*100;
+    $w3CScore = 100 - (0.6*$errorScore + 0.4*$warnScore);
+    $arr = explode('/', $countImagesAltTexts);
+    if ($arr[1] == 0) {
+      $imageAltScore = 100;
+    } else {
+      $imageAltScore = round($arr[0]/$arr[1]*100);
+    }
+    $arr = explode('/', $checkCleanUrls);
+    if ($arr[1] == 0) {
+      $cleanUrlScore = 100;
+    } else {
+      $cleanUrlScore = round($arr[0]/$arr[1]*100);
+    }
+    $codeScore = 0.3*$w3CScore + 0.2*$getPagespeedScore + 0.1*$imageAltScore + 0.05*$cleanUrlScore;
+    if ($getWWWResolve) {$codeScore = $codeScore + 0.1*100;}
+    if ($getIpCanonicalization) {$codeScore = $codeScore + 0.05*100;}
+    if ($hasFavicon) {$codeScore = $codeScore + 0.05*100;}
+    if ($checkLang != '') {$codeScore = $codeScore + 0.05*100;}
+    if ($checkMetaCharset != '') {$codeScore = $codeScore + 0.1*100;}
+    $codeScore = round($codeScore);
+
+    $googleIndexScore = log($getSiteindexTotal+1)/10;
+    if ($googleIndexScore > 1) {$googleIndexScore = 1;}
+    $bingIndexScore = log($getSiteindexTotalBing+1)/10;
+    if ($bingIndexScore > 1) {$bingIndexScore = 1;}
+    $backLinksScore = log($getGoogleBacklinksTotal+1)/5;
+    if ($backLinksScore > 1) {$backLinksScore = 1;}
+    $alexaScore = 1000/$getAlexaGlobalRank;
+    if ($alexaScore > 1) {$alexaScore = 1;}
+    $searchEngineScore = round(0.25*$getGoogleToolbarPageRank*10 + 0.15*$googleIndexScore*100 + 0.15*$bingIndexScore*100 + 0.05*$backLinksScore*100 + 
+        0.15*$alexaScore*100 + 0.15*$trustworthiness + 0.1*$childsafety);
+
+    $SEOScore = 0;
+    if ($hasRobots == 'true') $SEOScore += 5;
+    if ($hasSitemaps != 'false') $SEOScore += 20;
+    if (strlen($checkTitle) >= 5) $SEOScore += 20;
+    if (strlen($checkMetaDescription) >= 60) $SEOScore += 15;
+    if (strlen($checkMetaKeywords) >= 20) $SEOScore += 5;
+    if ($countWords >= 50) $SEOScore += 15;
+    if($countH1 == 1) $SEOScore += 20;
+
+    $googlePlusScore = log($getGooglePlusOnes+1)/10;
+    if ($googlePlusScore > 1) {$googlePlusScore = 1;}
+    $facebookScore = log($getFacebookInteractions['total_count']+1)/10;
+    if ($facebookScore > 1) {$facebookScore = 1;}
+    $twitterScore = log($getTwitterMentions+1)/10;
+    if ($twitterScore > 1) {$twitterScore = 1;}
+    $socialScore = round(0.3*$googlePlusScore*100 + 0.35*$facebookScore*100 + 0.35*$twitterScore*100);
+    $totalScore = round(($codeScore + $searchEngineScore + $SEOScore + $socialScore)/4);
+
+    $userName = $_SESSION["userName"];
+    $userEmail = $_SESSION["userEmail"];
+    $userPhone = $_SESSION["userPhone"];
+    $competitorsType = $_SESSION["competitorsType"];
+    $competitor1 = $_SESSION["competitor1"];
+    $competitor2 = $_SESSION["competitor2"];
+    $competitor3 = $_SESSION["competitor3"];
+
+    $allstat = $_SESSION["allstat"];
+    function getScore($urlstmp, $allstat){
+        $_validate =  $allstat[$urlstmp]['validate'];
+        $_countImagesAltTexts = $allstat[$urlstmp]['countImagesAltTexts'];
+        $_checkCleanUrls = $allstat[$urlstmp]['checkCleanUrls'];
+        $_getWWWResolve = $allstat[$urlstmp]['getWWWResolve'];
+        $_getIpCanonicalization = $allstat[$urlstmp]['getIpCanonicalization'];
+        $_hasFavicon = $allstat[$urlstmp]['hasFavicon'];
+        $_checkLang = $allstat[$urlstmp]['checkLang'];
+        $_checkMetaCharset = $allstat[$urlstmp]['checkMetaCharset'];
+        $_getPagespeedScore = $allstat[$urlstmp]['getPagespeedScore'];
+
+        $_errorScore = (count($_validate['errors'])/15 > 1) ? 100 : count($_validate['errors'])/15*100;
+        $_warnScore = (count($_validate['warnings'])/30 > 1) ? 100 : count($_validate['warnings'])/30*100;
+        $_w3CScore = 100 - (0.6*$_errorScore + 0.4*$_warnScore);
+        $_arr = explode('/', $_countImagesAltTexts);
+        if ($_arr[1] == 0) {
+            $_imageAltScore = 100;
+        } else {
+        $_imageAltScore = round($_arr[0]/$_arr[1]*100);
+        }
+        $_arr = explode('/', $_checkCleanUrls);
+        if ($_arr[1] == 0) {
+          $_cleanUrlScoreScore = 100;
+        } else {
+          $_cleanUrlScoreScore = round($_arr[0]/$_arr[1]*100);
+        }
+        $_codeScore = round(0.3*$_w3CScore + 0.2*$_getPagespeedScore + 0.1*$_imageAltScore + 0.05*$_cleanUrlScoreScore);
+        if ($_getWWWResolve) {$_codeScore = $_codeScore + 0.1*100;}
+        if ($_getIpCanonicalization) {$_codeScore = $_codeScore + 0.05*100;}
+        if ($_hasFavicon) {$_codeScore = $_codeScore + 0.05*100;}
+        if ($_checkLang != '') {$_codeScore = $_codeScore + 0.05*100;}
+        if ($_checkMetaCharset != '') {$_codeScore = $_codeScore + 0.1*100;}
+        $_codeScore = round($_codeScore);
+        $allstat[$urlstmp]['codeScore'] = $_codeScore;
+
+
+        $_getGoogleToolbarPageRank = $allstat[$urlstmp]['getGoogleToolbarPageRank'];
+        $_getSiteindexTotal = $allstat[$urlstmp]['getSiteindexTotal'];
+        $_getSiteindexTotalBing = $allstat[$urlstmp]['getSiteindexTotalBing'];
+        $_getGoogleBacklinksTotal = $allstat[$urlstmp]['getGoogleBacklinksTotal'];
+        $_getAlexaGlobalRank = $allstat[$urlstmp]['getAlexaGlobalRank'];
+        $_getWOT = $allstat[$urlstmp]['getWOT'];
+        $_0 = '0';
+        $_4 = '4';
+        $_trustworthiness = $_getWOT->$_0;
+        $_trustworthiness = $_trustworthiness[0];
+        $_childsafety = $_getWOT->$_4;
+        $_childsafety = $_childsafety[0];
+
+        $_googleIndexScore = log($_getSiteindexTotal+1)/10;
+        if ($_googleIndexScore > 1) {$_googleIndexScore = 1;}
+        $_bingIndexScore = log($_getSiteindexTotalBing+1)/10;
+        if ($_bingIndexScore > 1) {$_bingIndexScore = 1;}
+        $_backLinksScore = log($_getGoogleBacklinksTotal+1)/5;
+        if ($_backLinksScore > 1) {$_backLinksScore = 1;}
+        $_alexaScore = 1000/$_getAlexaGlobalRank;
+        if ($_alexaScore > 1) {$_alexaScore = 1;}
+        $_searchEngineScore = round(0.25*$_getGoogleToolbarPageRank*10 + 0.15*$_googleIndexScore*100 + 0.15*$_bingIndexScore*100 + 
+            0.05*$_backLinksScore*100 + 0.15*$_alexaScore*100 + 0.15*$_trustworthiness + 0.1*$_childsafety);
+        $allstat[$urlstmp]['searchEngineScore'] = $_searchEngineScore;
+
+
+        $_hasRobots = $allstat[$urlstmp]['hasRobots'];
+        $_hasSitemaps = $allstat[$urlstmp]['hasSitemaps'];
+        $_checkTitle = $allstat[$urlstmp]['checkTitle'];
+        $_checkMetaDescription = $allstat[$urlstmp]['checkMetaDescription'];
+        $_checkMetaKeywords = $allstat[$urlstmp]['checkMetaKeywords'];
+        $_countWords = $allstat[$urlstmp]['countWords'];
+        $_countH1 = $allstat[$urlstmp]['countH1'];
+
+        $_SEOScore = 0;
+        if ($_hasRobots == 'true') $_SEOScore += 5;
+        if ($_hasSitemaps != 'false') $_SEOScore += 20;
+        if (strlen($_checkTitle) >= 5) $_SEOScore += 20;
+        if (strlen($_checkMetaDescription) >= 60) $_SEOScore += 15;
+        if (strlen($_checkMetaKeywords) >= 20) $_SEOScore += 5;
+        if ($_countWords >= 50) $_SEOScore += 15;
+        if($_countH1 == 1) $_SEOScore += 20;
+        $allstat[$urlstmp]['SEOScore'] = $_SEOScore;
+
+
+        $_getGooglePlusOnes = $allstat[$urlstmp]['getGooglePlusOnes'];
+        $_getSiteindexTotal = $allstat[$urlstmp]['getSiteindexTotal'];
+        $_getSiteindexTotalBing = $allstat[$urlstmp]['getSiteindexTotalBing'];
+        $_getFacebookInteractions = $allstat[$urlstmp]['getFacebookInteractions'];
+        $_getTwitterMentions = $allstat[$urlstmp]['getTwitterMentions'];
+
+        $_googlePlusScore = log($_getGooglePlusOnes+1)/10;
+        if ($_googlePlusScore > 1) {$_googlePlusScore = 1;}
+        $_facebookScore = log($_getFacebookInteractions['total_count']+1)/10;
+        if ($_facebookScore > 1) {$_facebookScore = 1;}
+        $_twitterScore = log($_getTwitterMentions+1)/10;
+        if ($_twitterScore > 1) {$_twitterScore = 1;}
+        $_socialScore = round(0.3*$_googlePlusScore*100 + 0.35*$_facebookScore*100 + 0.35*$_twitterScore*100);
+        $allstat[$urlstmp]['socialScore'] = $_socialScore;
+
+
+        $_totalScore = round(($_codeScore + $_searchEngineScore + $_SEOScore + $_socialScore)/4);
+        $allstat[$urlstmp]['totalScore'] = $_totalScore;
+        return $allstat;
+    }
+
+    function getLetterScore($score) {
+        if ($score >= 0 && $score <= 20) {
+            return 'F';
+        } else if ($score >= 21 && $score <= 40) {
+            return 'D';
+        } else if ($score >= 41 && $score <= 60) {
+            return 'C-';
+        } else if ($score >= 61 && $score <= 70) {
+            return 'C';
+        } else if ($score >= 71 && $score <= 80) {
+            return 'C+';
+        } else if ($score >= 81 && $score <= 90) {
+            return 'B-';
+        } else if ($score >= 91 && $score <= 99) {
+            return 'B+';
+        } else if ($score == 100) {
+            return 'A';
+        }
+    }
+
+?>
+
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!-->
-<html class="no-js">
+<html class="en">
 <!--<![endif]-->
 <head>
 <meta charset="utf-8">
@@ -17,376 +337,341 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- Stylesheets -->
-<link rel="stylesheet" href="css/col.css" media="all">
-<link rel="stylesheet" href="css/2cols.css" media="all">
-<link rel="stylesheet" href="css/3cols.css" media="all">
-<link rel="stylesheet" href="css/4cols.css" media="all">
-<link rel="stylesheet" href="css/1024.css" media="all">
-<link rel="stylesheet" href="css/normalize.css">
+<link href="analyze2/css/bootstrap.min.css" rel="stylesheet">
+<link href="analyze2/css/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="analyze2/css/style.css" rel="stylesheet">
+<link href="analyze2/css/font-awesome.min.css" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/normalize.css">
 <link rel="stylesheet" href="css/layout.css">
-<script src="js/vendor/modernizr-2.6.2.min.js"></script>
+<link href="analyze2/css/localseov3.css" rel="stylesheet">
 
+<link href='http://fonts.googleapis.com/css?family=Alef:400,700' rel='stylesheet' type='text/css'>
 <!--[if lt IE 9]>
           <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
         <![endif]-->
 
 <link href='http://fonts.googleapis.com/css?family=Alef:400,700' rel='stylesheet' type='text/css'>
 <link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
-<script type="text/javascript">
-var email1 = '';
-var email2 = '';
-var errorActive = false;
-var validEmail = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
 
-function valideForm1(form)
-    {
-        $(".error_message1").html('');
-        errorActive = false;
-        first_name1 = $('#first_name1').val();
-        last_name1 = $('#last_name1').val();
-        email1 = $('#email1').val();
-        phone1 = $('#phone1').val();
-        city1 = $('#city1').val();
-        state1 = $('#state1').val();
+<script src="analyze2/js/jquery.min.js"></script>
+<script src="analyze2/js/bootstrap.min.js"></script>
 
-        var dataString1 = 'first_name1='+ first_name1 + '&last_name1=' + last_name1 + '&email1=' + email1 + '&phone1=' + phone1 + '&city1=' + city1 + '&state1=' + state1;  
+<script type='text/javascript' src="analyze2/js/bootstrap-progressbar.js"></script>
+<!--[if IE]><script type="text/javascript" src="js/excanvas.js"></script><![endif]-->
+<script src="analyze2/js/jquery.knob.js"></script>
+    <script>
+    $(function($) {
+    $(".knob").knob();
+    });
+    </script>
 
-      if(first_name1 == ''){
-       errorActive = true;
-       $(".error_message1").fadeIn('slow').html('First Name is required.');   
-       $('#first_name1').focus();
-      }else if(last_name1 == ''){
-       errorActive = true;
-       $(".error_message1").fadeIn('slow').html('Last Name is required.');   
-       $('#last_name1').focus();
-      }else if(email1 == '') {
-       errorActive = true;
-       $(".error_message1").fadeIn('slow').html('Email Address is required.');  
-       $('#email1').focus();
-      }else if(!validEmail.test(email1)){
-       errorActive = true;
-       $(".error_message1").fadeIn('slow').html('Email Address must be a valid email address.');  
-       $('#email1').focus();
-      }else if(phone1 == ''){
-       errorActive = true;
-       $(".error_message1").fadeIn('slow').html('Phone is required.');   
-       $('#phone1').focus();
-      }else if(city1 == ''){
-       errorActive = true;
-       $(".error_message1").fadeIn('slow').html('City is required.');   
-       $('#city1').focus();
-      }else if(state1 == ''){
-       errorActive = true;
-       $(".error_message1").fadeIn('slow').html('State is required.');   
-       $('#state1').focus();
-      }else if(errorActive!=true){
-        $.ajax({  
-            type: "POST",  
-            url: "insert_business_report.php",  
-            data: dataString1,  
-            success: function(response)
-            {
-                $(".error_message1").fadeIn('slow').html('Thanks, your information has been submited.'); 
-                blank_inputs();
-                $("#form1 input").attr('disabled', 'disabled');
-            }
-        });         
 
-    }else {
-        return false;  
-    }
-    return false;       
-} /*End form validation */
 
-function valideForm2(form)
-    {
-        $(".error_message2").html('');
-        errorActive = false;
-        first_name2 = $('#first_name2').val();
-        last_name2 = $('#last_name2').val();
-        email2 = $('#email2').val();
-        phone2 = $('#phone2').val();
-        city2 = $('#city2').val();
-        state2 = $('#state2').val();
-
-        var dataString2 = 'first_name2='+ first_name2 + '&last_name2=' + last_name2 + '&email2=' + email2 + '&phone2=' + phone2 + '&city2=' + city2 + '&state2=' + state2;  
-
-      if(first_name2 == ''){
-       errorActive = true;
-       $(".error_message2").fadeIn('slow').html('First Name is required.');   
-       $('#first_name2').focus();
-      }else if(last_name2 == ''){
-       errorActive = true;
-       $(".error_message2").fadeIn('slow').html('Last Name is required.');   
-       $('#last_name2').focus();
-      }else if(email2 == '') {
-       errorActive = true;
-       $(".error_message2").fadeIn('slow').html('Email Address is required.');  
-       $('#email2').focus();
-      }else if(!validEmail.test(email2)){
-       errorActive = true;
-       $(".error_message2").fadeIn('slow').html('Email Address must be a valid email address.');  
-       $('#email2').focus();
-      }else if(phone2 == ''){
-       errorActive = true;
-       $(".error_message2").fadeIn('slow').html('Phone is required.');   
-       $('#phone2').focus();
-      }else if(city2 == ''){
-       errorActive = true;
-       $(".error_message2").fadeIn('slow').html('City is required.');   
-       $('#city2').focus();
-      }else if(state2 == ''){
-       errorActive = true;
-       $(".error_message2").fadeIn('slow').html('State is required.');   
-       $('#state2').focus();
-      }else if(errorActive!=true){
-        form.submit();        
-
-    }else {
-        return false;  
-    }
-    return false;       
-} /*End form validation */
-</script>
-<style type="text/css">
-.blue {
-	color: #117CCD;
-}
-.red {
-	color: #CC0000 !important;
-}
-.green {
-	color: #68982F !important;
-}
-.redButtton i {
-	color: #FFFFFF !important;
-	font-size: 29px;
-	text-decoration: none;
-}
-</style>
 </head>
-<body onload="init();">
-
-<!-- Google Tag Manager -->
-<noscript>
-<iframe src="//www.googletagmanager.com/ns.html?id=GTM-PGGHV6"
-height="0" width="0" style="display:none;visibility:hidden"></iframe>
-</noscript>
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-PGGHV6');</script> 
-<!-- End Google Tag Manager -->
-
-<div id="container">
-<?php include('header.php'); ?>
-<div id="post-head"></div>
-<div id="hero" class="full-w">
-  <div> <!--<span style="color: rgb(17, 124, 205); white-space: nowrap; text-decoration: none; text-transform: uppercase; font-size: 24px; font-weight: normal;">Our Local SEO Solution</span>
-    <h1><span class="black">Strategy</span> <i>+</i> <span class="black">Local business listings</span> <i>+</i><br>
-      <span class="black">Local Seo</span> <i>+</i> <span class="black">Real time Reporting</span> <i>=</i> <br />
-      <span class="first red">Your Company’s Success</span><br />-->
-      <!--<span class="second">More Customers, More Sales, <br />More Phone Calls</span>--></h1>
-    <!-- <a href="packages.php" style="text-decoration: none;"><div class="redButtton"><span>Pick your package <br /><i style="color:#000 important;">today!</i></span></div></a> --> 
-  </div>
-  
-</div>
-<div class="colo_border" style="margin:0 auto; max-width: 1000px;"><img src="img/colouredborder.png"> </div>
-<div id="act-boxes" class="cont-w" style="height: 225px;">
-  <div class="shade first col span_1_of_3"> <img src="img/grid1.png">
-   
-    <a href="listing-precheck.php">Check Now</a> </div>
-  <div class="shade second col span_1_of_3"> <img src="img/grid2.png">
-    
-    <a href="analyze.php">Analyze</a> </div>
-  <div class="shade third col span_1_of_3">
-    <div class="learnmore"><a class="lmore" href="local-seo-grant.php">Learn More</a></div>
-    <img src="img/grid3.png">
-   
-    <a id="poplink-2">Apply Now</a> </div>
-</div>
 
 
-<div id="main-content" class="cont-w clear">
-<div class="colo_border"><img src="img/colouredborder.png"> </div>
-  <div class="cnt_space1">
-    <div class="subject_thumb"> <img src="img/onmap.png"> </div>
-    <div class="subject_txt">
-      <h2>We Put Your Business On The Map, Literally.</h2>
-      <p>Today’s online marketplace demands solutions that fit potential customers’ needs now, more than ever.  
-        With traditional media taking a back seat to online strategies and mobile optimization, it is crucial to the 
-        success of businesses to be present when users are searching for their products or services. </p>
-      <p>There are daily hurdles associated with marketing and advertising budgets for a business; however, if you are not 
-        allocating dollars towards an online campaign and a customer can’t find you, you can be certain they are finding 
-        your competitors.</p>
-      </h2>
-    </div>
-    <div class="colo_border"><img src="img/colouredborder.png"> </div>
-    <div class="clear"></div>
-  </div>
-  <div class="cnt_space2">
-  <div class="colo_border"><img src="img/colouredborder.png"> </div>
-    <div class="subject_thumb"> <img src="img/riseabove.png"> </div>
-    <div class="subject_txt">
-      <h2>Rise Above Your Competition</h2>
-      <p>Local SEO takes the time to research and understand your business to be sure we are developing a strategy aimed 
-        at your target demographics.  We live in a time where consumers are far more educated than they’ve ever been; they are 
-        reading up on products, reviews and information to be sure they are making the right purchase decision each, and every, time.  
-        As a result of the time spent researching, you cannot afford to be absent when they are actively looking.</p>
-      <p>Our specialty at Local SEO is to ensure those customers looking for your products and services are finding you over your competition.  
-        By implementing strategies and tactics that are preferred by the search engines for your map data and business listings, 
-        we are able to maximize your exposure and success across all fronts.  We combine the work we do with your directories and map 
-        listings with revolutionary SEO technology to increase your visibility organically as well as the relevancy to searches being done 
-        on a daily basis.</p>
-    </div>
-    <div class="colo_border"><img src="img/colouredborder.png"> </div>
-    <div class="clear"></div>
-  </div>
-  <div class="cnt_space3">
-  <div class="colo_border"><img src="img/colouredborder.png"> </div>
-    <div class="subject_thumb"> <img src="img/morebusiness.png"> </div>
-    <div class="subject_txt">
-      <h2>Ready For More Business?</h2>
-      <p>Local SEO is an online search engine optimization company that was established in 2005 on the bare foundation of improving others’ businesses through organic tactics and website optimization.  
-        Our organic SEO agency offers search engine and directory optimization, consulting and other online search engine marketing services that are beneficial to businesses large and small.</p>
-      <p>Our firm will carry out an SEO strategy that will increase your exposure, boost credibility and generate a higher relevancy in order to build a stronger client base for years to come!.</p>
-      </h2>
-    </div>
-    <div class="colo_border"><img src="img/colouredborder.png"> </div>
-    <div class="clear"></div>
-  </div>
-  </div>
-  <?php include('footer.php'); ?>
-</div>
-<div id="pop-1" class="popup">
-  <div class="shade">
-    <h1>Get a FREE Business Report</h1>
-    <div class="wrapForm">
-      <form id="form1" onSubmit="return valideForm1(this);">
-        <label>First Name:</label>
-        <input type="text" name="first_name1" id="first_name1">
-        <br>
-        <div class="clear"></div>
-        <label>Last Name:</label>
-        <input type="text" name="last_name1" id="last_name1">
-        <br>
-        <div class="clear"></div>
-        <label>Email:</label>
-        <input type="text" name="email1" id="email1">
-        <br>
-        <div class="clear"></div>
-        <label>Phone:</label>
-        <input type="text" name="phone1" id="phone1">
-        <br>
-        <div class="clear"></div>
-        <label>City:</label>
-        <input type="text" name="city1" id="city1">
-        <br>
-        <div class="clear"></div>
-        <label>State:</label>
-        <input type="text" name="state1" id="state1">
-        <br>
-        <div class="clear"></div>
-        <input class="submit" type="submit" value="GO">
-      </form>
-      <div class="error_message1"></div>
-      <div class="close shade">X</div>
-    </div>
-  </div>
-</div>
-<div id="pop-2" class="popup">
-  <div class="shade">
-    <h1>Pre-Qualify for Local Seo Business Grant</h1>
-    <div class="wrapForm">
-      <form action="https://www.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8" method="POST" id="form2" onSubmit="return valideForm2(this);">
-        <input type="hidden" name="oid" value="00DC0000000Q2jr">
-        <input type="hidden" name="retURL" value="http://localseo.com/thankyou.php">
-        <!--  ----------------------------------------------------------------------  --> 
-        <!--  NOTE: These fields are optional debugging elements. Please uncomment    --> 
-        <!--  these lines if you wish to test in debug mode.                          --> 
-        <!--  <input type="hidden" name="debug" value=1>                              --> 
-        <!--  <input type="hidden" name="debugEmail" value="daniel@nativerank.com">   --> 
-        <!--  ----------------------------------------------------------------------  -->
-        <label for="first_name">First Name</label>
-        <input  id="first_name2" maxlength="40" name="first_name" size="20" type="text" />
-        <br>
-        <div class="clear"></div>
-        <label for="last_name">Last Name</label>
-        <input  id="last_name2" maxlength="80" name="last_name" size="20" type="text" />
-        <br>
-        <div class="clear"></div>
-        <label for="email">Email</label>
-        <input  id="email2" maxlength="80" name="email" size="20" type="text" />
-        <br>
-        <div class="clear"></div>
-        <label for="phone">Phone</label>
-        <input  id="phone2" maxlength="40" name="phone" size="20" type="text" />
-        <br>
-        <div class="clear"></div>
-        <label for="city">City</label>
-        <input  id="city2" maxlength="40" name="city" size="20" type="text" />
-        <br>
-        <div class="clear"></div>
-        <label for="state">State/Province</label>
-        <input  id="state2" maxlength="20" name="state" size="20" type="text" />
-        <br>
-        <div class="clear"></div>
-        <input type="submit" id="submit" name="submit" value="Go"  style="float: right; clear: both;">
-      </form>
-      <div class="error_message2"></div>
-      <div class="close shade">X</div>
-    </div>
-  </div>
-</div>
-<div id="info_ww" style="display:none;">?</div>
-<!-- <div id="info_wh" style="display:none;">?</div> --> 
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script> 
-<script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.3.min.js"><\/script>')</script> 
-<script src="js/plugins.js"></script> 
-<script src="js/jquery.filter_input.js"></script> 
-<script src="js/main_home.js"></script> 
-<script type="text/javascript">
-jQuery(document).ready(function(){
-  jQuery('#submit').val('Go');
-    // if (jQuery('#mobileClass').is(':visible')) {
-    //     window.location = '#mobileClass';
-    // } else {
-       
-    // }
-});
+<body>
 
-$( window ).resize(function() {
-  init();
-});
+	<div class="container-full block">
+		<a href="#mobileClass" id="anchor">.</a>
+		<?php include ('header.php'); ?>
+		<div id="mobileClass"></div>
+		<div class="container hidden-pull"></div>
+        <?php if (!is_null($url)): ?>
+            <?php include ('analyze2/sidebar-sm.php'); ?>
+            <?php include ('analyze2/sidebar-smm.php'); ?>
+            <?php include ('analyze2/sidebar-xs.php'); ?>
+        <?php endif; ?>
+        <script>
+            var url;
+            counter_end = 31;
+            function ajax_submit(form) {
+                counter = 0;
+                url = $('#domainInput').val();
+                $('.progressbarmaintext').removeClass('hide');
+                $('#progressbarmain').removeClass('hide');
+                var userName = $('[name=userName]').val();
+                var userEmail = $('[name=userEmail]').val();
+                var userPhone = $('[name=userPhone]').val();
+                competitorsType = $('[name=competitorsType]')[0].checked;
+                competitor1 = $('[name=competitor1]').val();
+                competitor2 = $('[name=competitor2]').val();
+                competitor3 = $('[name=competitor3]').val();
+                logo = $('[name=logo]:checked').val();
+                if (userName == "" || userEmail == "" || userPhone == "") {
+                    alert("Please fill all fields!");
+                    return;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: "analyze2/service.php",
+                    data: "url="+url+"&service=clean",
+                    success: function(msg){
+                        $.ajax({
+                            type: "POST",
+                            url: "analyze2/service.php",
+                            data: "url="+url+"&service=start&userName="+userName+"&userEmail="+userEmail+"&userPhone="+userPhone+"&logo="+logo+
+                                "&competitorsType="+competitorsType+"&competitor1="+competitor1+"&competitor2="+competitor2+"&competitor3="+competitor3,
+                            success: function(msg){
+                                check();
+                            }
+                        });
+                    }
+                });
+            }
+            function check() {
+                var array = new Array( "validate", "getPagespeedScore", "parser","getDomainAge","getWWWResolve","getIpCanonicalization","hasFavicon",
+                            "hasRobots", "hasSitemaps", "getGoogleToolbarPageRank", "getGoogleBacklinksTotal", 
+                            "getGooglePlusOnes", "getSiteindexTotal", "getSiteindexTotalBing", "getFacebookInteractions", 
+                            "getTwitterMentions", "getAlexaGlobalRank","getSEMRushDomainRank","getSEMRushOrganicKeywords",
+                            "getWOT" );
+                for(var i = 0; i < array.length; i++){
+                    $.ajax({
+                        type: "POST",
+                        url: "analyze2/service.php",
+                        data: "url="+url+"&service="+array[i],
+                        success: function(msg) {
+                            var result = $.parseJSON(msg);
+                            
+                            for(key in result) {
+                                counter++;
+                                $('#barmain')[0].style.width=counter/counter_end*100+'%';
+                                if(counter == counter_end){
+                                    $('.progressbarmaintext').addClass('hide');
+                                    $('#progressbarmain').addClass('hide');
+                                    $('.progressbarcompetitorstext').removeClass('hide');
+                                    $('#progressbarcompetitors').removeClass('hide');
+                                    if (competitorsType) {
+                                        $.ajax({
+                                            type: "POST",
+                                            url: "analyze2/service.php",
+                                            data: "url="+url+"&service=competitors",
+                                            success: function(msg){
+                                                checkCompetitors(msg);
+                                            }
+                                        });
+                                    } else {
+                                        result = 0;
+                                        competitors = new Array();
+                                        if (competitor1 != "") {
+                                            competitors[result] = competitor1;
+                                            result++;
+                                        }
+                                        if (competitor2 != "") {
+                                            competitors[result] = competitor2;
+                                            result++;
+                                        }
+                                        if (competitor3 != "") {
+                                            competitors[result] = competitor3;
+                                            result++;
+                                        }
+                                        urlCompetitor = "url="+url+"&service=competitorsManual&count="+result;
+                                        for(var i = 0; i < result; i++){
+                                            urlCompetitor = urlCompetitor+"&competitor"+i+"="+competitors[i];
+                                        }
+                                        $.ajax({
+                                            type: "POST",
+                                            url: "analyze2/service.php",
+                                            data: urlCompetitor,
+                                            success: function(msg){
+                                                checkCompetitorsManual(result);
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+            function checkCompetitors(msg) {
+                result = parseInt($.parseJSON(msg));
+                counter = 0;
+                if (result == 0){
+                    $.ajax({
+                        type: "POST",
+                        url: "analyze2/service.php",
+                        data: "url="+url+"&service=finish",
+                        success: function(msg){
+                            window.location.href = 'SEOTool.php';
+                        }
+                    });
+                    return;
+                }
 
-function init() {
-  var uniwin = {
-    width: window.innerWidth || document.documentElement.clientWidth
-      || document.body.offsetWidth,
-    height: window.innerHeight || document.documentElement.clientHeight
-      || document.body.offsetHeight
-  };
+                for(var i = 0; i < result; i++){
+                    $.ajax({
+                        type: "POST",
+                        url: "analyze2/service.php",
+                        data: "url="+url+"&service=competitor"+i,
+                        success: function(msg){
+                            counter++;
+                            $('#barcompetitors')[0].style.width=counter/result*100+'%';
+                            if(counter == result) {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "analyze2/service.php",
+                                    data: "url="+url+"&service=finish",
+                                    success: function(msg){
+                                        window.location.href = 'SEOTool.php';
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+            function checkCompetitorsManual(result) {
+                counter = 0;
+                if (result == 0){
+                    $.ajax({
+                        type: "POST",
+                        url: "analyze2/service.php",
+                        data: "url="+url+"&service=finish",
+                        success: function(msg){
+                            window.location.href = 'SEOTool.php';
+                        }
+                    });
+                    return;
+                }
+                for(var i = 0; i < result; i++){
+                    $.ajax({
+                        type: "POST",
+                        url: "analyze2/service.php",
+                        data: "url="+url+"&service=competitor"+i,
+                        success: function(msg){
+                            counter++;
+                            $('#barcompetitors')[0].style.width=counter/result*100+'%';
+                            if(counter == result) {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "analyze2/service.php",
+                                    data: "url="+url+"&service=finish",
+                                    success: function(msg){
+                                        window.location.href = 'SEOTool.php';
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        </script>
 
-  $("#info_ww").text(uniwin.width);
-  $("#info_wh").text(uniwin.height);
-}
+		<div id="main-container" class="button-container">
+			<div class="row">
+				<div class="col-md-10 col-md-offset-1 col-sm-12 col-sm-offset-0 main-butt">
+					<form name="form" method="post" onsubmit="ajax_submit(this);return false;" class="form-inline form-domain">
+                        <div class="input-group userdata-container">
+                            <input class="form-control userdata" type="text" name="userName" placeholder="Name"
+                                <?php if (isset($userName)) echo ' value="'.$userName.'"' ?>
+                            >
+                            <input class="form-control userdata" type="text" name="userEmail" placeholder="Email"
+                                <?php if (isset($userEmail)) echo ' value="'.$userEmail.'"' ?>
+                            >
+                            <input class="form-control userdata" type="text" name="userPhone" placeholder="Phone"
+                                <?php if (isset($userPhone)) echo ' value="'.$userPhone.'"' ?>
+                            >
+                        </div>
+                        <div class="input-group competitorsdata-container competitorsdata-container-checked">
+                            <span class="input-group-addon competitors-checkbox">
+                                <input type="checkbox" id="competitors_checkbox" name="competitorsType" 
+                                    <?php if (!isset($competitorsType) || $competitorsType == "true") echo ' checked' ?>
+                                >
+                                Competitors: <span id="competitors_type">SEMrush</span>
+                            </span>
+                            <input class="form-control competitorsdata" type="text" name="competitor1" placeholder="Competitor #1 URL"
+                                <?php if (isset($competitor1)) echo ' value="'.$competitor1.'"' ?>
+                            >
+                            <input class="form-control competitorsdata" type="text" name="competitor2" placeholder="Competitor #2 URL"
+                                <?php if (isset($competitor2)) echo ' value="'.$competitor2.'"' ?>
+                            >
+                            <input class="form-control competitorsdata" type="text" name="competitor3" placeholder="Competitor #3 URL"
+                                <?php if (isset($competitor3)) echo ' value="'.$competitor3.'"' ?>
+                            >
+                        </div>
+                        <div class="input-group center">
+                            <label class="radio-inline">
+                                <input type="radio" name="logo" value="localseo"
+                                    <?php if ((isset($_SESSION['logo']) && $_SESSION['logo'] == "localseo") || !isset($_SESSION['logo'])) echo ' checked' ?>
+                                >
+                                <img src="analyze2/img/logoPdf.png" height="75" />
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="logo" value="nativerank"
+                                    <?php if (isset($_SESSION['logo']) && $_SESSION['logo'] == "nativerank") echo ' checked' ?>
+                                >
+                                <img src="analyze2/img/nativerank_logo.png" height="75" />
+                            </label>
+                        </div>
+                        <div class="input-group">
+                            <input class="form-control" id="domainInput" type="text" name="url" placeholder="domain.com"
+                                <?php if (isset($url)) echo ' value="'.$url.'"' ?>
+                            >
+                            <div class="input-group-btn">
+                                <button type="submit" class="btn btn-primary">Analyze!</button>
+                            </div>
+                        </div>
+					</form>
+				</div>
+			</div>
+        <script>
+            $("#competitors_checkbox").change(function() {
+                if(this.checked) {
+                    $(".competitorsdata-container").addClass("competitorsdata-container-checked");
+                    $("#competitors_type")[0].innerHTML = "SEMrush";
+                } else {
+                    $(".competitorsdata-container").removeClass("competitorsdata-container-checked");
+                    $("#competitors_type")[0].innerHTML = "Manual";
+                }
+            });
+            if($("#competitors_checkbox")[0].checked) {
+                $(".competitorsdata-container").addClass("competitorsdata-container-checked");
+                $("#competitors_type")[0].innerHTML = "SEMrush";
+            } else {
+                $(".competitorsdata-container").removeClass("competitorsdata-container-checked");
+                $("#competitors_type")[0].innerHTML = "Manual";
+            }
+        </script>
+            <div class="row">
+                <div class="progressbarmaintext hide">Analyzing your site!</div>
+                <div id="progressbarmain" class="hide">
+                    <div class="row" style="width: 0%" id="barmain"></div>
+                </div>
+                <div class="progressbarcompetitorstext hide">Analyzing your competitors!</div>
+                <div id="progressbarcompetitors" class="hide">
+                    <div style="width: 0%" id="barcompetitors"></div>
+                </div>
+            </div>
+			
+		</div>
+		<div id="main-container">
+            <?php if (!is_null($url) && !is_null($finish)): ?>
+                <div class="col-md-4 visible-desktop">
+    			<?php include ('analyze2/sidebar.php'); ?>
+                </div>
+                <div class="col-md-8">
+    			<?php include ('analyze2/content.php'); ?>
+                </div>
+            <?php endif; ?>
+		</div>
+		<div class="container hidden-pull-down"></div>
+		<?php include ('footer.php'); ?>
+	</div>
+	<script src='analyze2/js/smooth-scroll.js'></script>
+    <script src="analyze2/js/shevron.js"></script>
+	<script>
+		smoothScroll.init({
+			speed: 500,
+			easing: 'easeInOutCubic',
+			offset: 0,
+			updateURL: false,
+			callbackBefore: function ( toggle, anchor ) {},
+			callbackAfter: function ( toggle, anchor ) {}
+		});
+	</script>
 
-</script> 
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-21171343-2']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 </body>
 </html>

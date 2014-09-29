@@ -97,7 +97,7 @@
 	width: 96%;
 }
 footer > div > div {
-	width: 21% !important;
+	width: 30% !important;
 }
 footer > div > div:nth-of-type(2) {
 	float: left !important;
@@ -927,7 +927,7 @@ header .menu {
 	z-index: 99999;
 }
 .menu {
-	width: 90% !important;
+	width: 61% !important;
 }
 /* Clearfix */
 .clearfix:before,  .clearfix:after {
