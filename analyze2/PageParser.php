@@ -44,6 +44,7 @@ class PageParser
 		    curl_close($ch);
 		$this->page = $page;
 		$this->page_size = strlen($page)/1024;
+		echo error_get_last();
 	}
 
 	public function getPage() {
@@ -51,6 +52,7 @@ class PageParser
 	}
 
 	public function parsePage() {
+
 		$this->dom = new simple_html_dom();
 		$this->dom->load($this->page);
 		$this->page2 = $this->dom->plaintext;

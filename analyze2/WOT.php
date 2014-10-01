@@ -16,17 +16,17 @@ class WOT {
     }
     
     public  function getAllReputation(){
-	try
-	{
-	    //print_r($this->api.$this->page.'/&key='.$this->key);
-	    $this->results = file_get_contents($this->api.$this->page.'/&key='.$this->key);//call to api server
-	    
-	    $this->results = json_decode($this->results);
-	    //var_dump($this->results);
-	} catch (Exception $e) {
-	    $this->results = 0;
-	}
-	return $this->results;
+		try
+		{
+		    //print_r($this->api.$this->page.'/&key='.$this->key);
+		    $this->results = file_get_contents($this->api.$this->page.'/&key='.$this->key);//call to api server
+		    
+		    $this->results = json_decode($this->results);
+		    //var_dump($this->results);
+		} catch (Exception $e) {
+		    $this->results = 0;
+		}
+		return $this->results;
     }
 }
 //$page = 'http://ya.org/';

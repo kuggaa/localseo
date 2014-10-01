@@ -85,6 +85,7 @@ function setKeywords($i, $url, $count){
 if (isset($_POST["url"])) {
     $serv = $_POST["service"];
     $url = $_POST["url"];
+
     if(strpos($url,"://")===false && substr($url,0,1)!="/") $url = "http://".$url;
     $parsed = parse_url($url);
     $parsed['scheme'] = 'http';

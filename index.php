@@ -181,7 +181,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 
 <div id="container">
-<?php include('header.php'); ?>
+<?php 
+include('header.php'); 
+?>
 <div id="post-head"></div>
 <div id="hero" class="full-w">
   <div> <!--<span style="color: rgb(17, 124, 205); white-space: nowrap; text-decoration: none; text-transform: uppercase; font-size: 24px; font-weight: normal;">Our Local SEO Solution</span>

@@ -1,5 +1,6 @@
 <?php 
     session_start();
+    error_reporting(E_ERROR);
     $_SESSION['type'] = 'private';
     $url =  $_SESSION['url'];
     $finish =  $_SESSION['finish'];
@@ -20,6 +21,8 @@
     *   Alexa Rank
     */
     $getAlexaGlobalRank =  $_SESSION['getAlexaGlobalRank'];
+    if ($getAlexaGlobalRank == 0)
+        $getAlexaGlobalRank = 100000;
     /*
     *   END Alexa Rank
     */
@@ -45,6 +48,8 @@
     *   WOT Reputation - get all json data  from wot api server
     */
     $getWOT = $_SESSION['getWOT'];
+    if ($getWOT == null)
+        $getWOT = array();
     $getWOT =  reset($getWOT);
     
     function objectToArray($d) {
@@ -428,11 +433,17 @@
                             "getTwitterMentions", "getAlexaGlobalRank","getSEMRushDomainRank","getSEMRushOrganicKeywords",
                             "getWOT" );
                 for(var i = 0; i < array.length; i++){
+                // for(var i = 2; i < 3; i++){
+                    var serviceNameString = array[i];
                     $.ajax({
                         type: "POST",
                         url: "analyze2/service.php",
                         data: "url="+url+"&service="+array[i],
                         success: function(msg) {
+                            if (msg == "")
+                                alert("Right now!");
+                            else
+                                console.log(msg);
                             var result = $.parseJSON(msg);
                             
                             for(key in result) {
